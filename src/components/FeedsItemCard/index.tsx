@@ -9,7 +9,7 @@ import {
 function FeedsItemCard(props: any) {
     const { item, width } = props;
     const itemWidth = width;
-    const imgScaleRatio = 0.92;
+    const imgScaleRatio = 0.93;
 
     function getImageScale ({imgPath: imgPath, rowNumber: rowNumber, containerWidth: containerWidth, imgScaleRatio: imgScaleRatio}) {
         const imageObject = Image.resolveAssetSource(imgPath);
@@ -51,13 +51,13 @@ function FeedsItemCard(props: any) {
 
 const styles = StyleSheet.create({
     card: {
-        paddingLeft: 3,
-        paddingRight: 3
+        marginLeft: 3,
+        marginRight: 10
     },
     imageContainer: {
         flexDirection: 'row', 
         flex: 1, 
-        justifyContent: 'space-around'
+        justifyContent: 'space-between'
     },
     image: {
         alignItems: "center",

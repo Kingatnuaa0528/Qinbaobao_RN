@@ -12,7 +12,7 @@ import Icon from '../../resource/icons';
 function TabBar() {
     const navigation = useNavigation(); 
     const onPress = () => {
-        navigation.navigate('Publish');
+        navigation.navigate('Optional');
     }
     return (
         <View style={styles.container}>
