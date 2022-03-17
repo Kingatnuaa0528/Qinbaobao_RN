@@ -9,15 +9,16 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 
-import { fetchPhoto } from '../redux/module/photo';
+import { fetchPhoto, clearOptionalList, clearChosenList } from '../redux/module/photo';
 import { REVEAL_IMAGE } from '../utils/album.android';
 import PhotoCard from '../components/AlbumCard/photoCard';
 
 const NUM_PER_ROW = 3;
+const ON_END_REACHED_THRES = 0.2;
 
 // ui组件
 const OptionalListPage = (props) => {
-  const { data, fetchPhoto } = props;
+  const { data, fetchPhoto, clearOptionalList, clearChosenList } = props;
   const [imgWidth, setWidth] = useState(120);
   const [imgHeight, setHeight] = useState(120);
 
@@ -26,6 +27,10 @@ const OptionalListPage = (props) => {
     const { width, height } = getImageScale();
     setWidth(width);
     setHeight(height);
+    return function clear() {
+      clearOptionalList();
+      clearChosenList();
+    }
   }, []);
 
   function getImageScale() {
@@ -65,6 +70,10 @@ const OptionalListPage = (props) => {
     }
   }
 
+  function onEndReached() {
+    console.log("onEndReached");
+  }
+
   // render
   return (
     <View style={styles.page}>
@@ -73,6 +82,8 @@ const OptionalListPage = (props) => {
         numColumns={NUM_PER_ROW}
         renderItem={(item) => renderItem(item)}
         columnWrapperStyle={styles.list}
+        onEndReachedThreshold={ON_END_REACHED_THRES}
+        onEndReached={() => onEndReached()}
       />
     </View>
   );
@@ -89,6 +100,12 @@ function mapDispatchToProps(dispatch) {
   return {
     fetchPhoto: () => {
       dispatch(fetchPhoto);
+    },
+    clearOptionalList: () => {
+      dispatch(clearOptionalList());
+    },
+    clearChosenList: () => {
+      dispatch(clearChosenList());
     }
   }
 }

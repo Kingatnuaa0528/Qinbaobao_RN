@@ -18,11 +18,20 @@ export function getPhotos(size: number) {
       first: size,
       assetType: 'Photos'
     });
-    return result.edges;
+    return result;
   });
 }
 
-export function getPhotosByPage(size: number, cursor: number) {
+export function getPhotosByPage(size: number, cursor: string) {
+  const permissions = [PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE, PermissionsAndroid.PERMISSIONS.CAMERA];
+  return fetchWithPermission(permissions, async () => {
+    const result = await CameraRoll.getPhotos({
+      first: size,
+      after: cursor,
+      assetType: 'Photos'
+    });
+    return result;
+  })
 
 }
 
@@ -46,7 +55,6 @@ export function getAllByPage(size: number, cursor: number) {
 function fetchWithPermission(permissions: Array<Permission>, action: Function) {
   return checkPermission(permissions).then(async response => {
     if (response == true) {
-      console.log("checkPermission success!");
       const result = await action();
       return Promise.resolve(result);
       //return result.edges;

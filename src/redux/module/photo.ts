@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
   getPhotos,
+  getPhotosByPage
 } from '../../utils/album.android';
 
 export const actions = {
@@ -9,6 +10,7 @@ export const actions = {
   FETCH_PHOTO: "PHOTO/FETCH_PHOTO",
   FETCH_VIDEO: "PHOTO/FETCH_VIDEO",
   CHOOSE_PHOTO: "PHOTO/CHOOSE_PHOTO",
+  CLEAR_OPTIONAL_LIST: "PHOTO/CLEAR_OPTIONAL_LIST",
   CLEAR_CHOSEN_LIST: "PHOTO/CLEAR_CHOSEN_LIST",
 }
 
@@ -17,7 +19,9 @@ const PAGE_SIZE = 20;
 const initialStatus = {
   photoList: [],
   dataStatus: "",
-  chosenList: []
+  chosenList: [],
+  cursor: '0',
+  hasNext: true
 };
 
 // reducer
@@ -26,13 +30,22 @@ export function photoReducer(state = initialStatus, action: any) {
     case actions.FETCH_PHOTO: {
       return {
         ...state,
-        photoList: action.payload
+        photoList: [...state.photoList, ...action.payload.photoList],
+        cursor: action.payload.cursor,
+        hasNext: action.payload.hasNext
       }
     }
     case actions.CHOOSE_PHOTO: {
       return {
         ...state,
         chosenList: action.payload
+      }
+    }
+    case actions.CLEAR_OPTIONAL_LIST: {
+      return {
+        ...state,
+        photoList: [],
+        cursor: '0'
       }
     }
     case actions.CLEAR_CHOSEN_LIST: {
@@ -49,31 +62,37 @@ export function photoReducer(state = initialStatus, action: any) {
 }
 
 // action creater
-export function fetchPhoto(dispatch: any) {
-  getPhotos(PAGE_SIZE).then(response => {
-    let photoList = response;
-    return dispatch({
-      type: actions.FETCH_PHOTO,
-      payload: photoList
-    })
-  }).catch((err) => {
-    console.log("[getPhotos] response error! " + JSON.stringify(err));
-    return dispatch({
-      type: actions.FETCH_PHOTO,
-      payload: []
-    })
-  });
+export function fetchPhoto() {
+  return (dispatch, getState) => {
+    const cursor = getState().photoReducer.cursor;
+    getPhotosByPage(PAGE_SIZE, cursor).then(response => {
+      let payload = {
+        photoList: response.edges,
+        cursor: response.page_info.end_cursor,
+        hasNext: response.page_info.has_next_page
+      }
+      dispatch({
+        type: actions.FETCH_PHOTO,
+        payload: payload
+      })
+    }).catch((err) => {
+      console.log("[getPhotos] response error! " + JSON.stringify(err));
+      dispatch({
+        type: actions.FETCH_PHOTO,
+        payload: []
+      })
+    });
+  }
 }
 
 export function chooseImage(item, isChosen) {
   let imgUrl = item.imgUrl;
   return (dispatch, getState) => {
     const { chosenList } = getState().photoReducer;
-    console.log("choseList: " + JSON.stringify(chosenList));
     let payload = chosenList;
     if (!isChosen) {
       chosenList.map((item, index) => {
-        if(item === imgUrl) {
+        if (item === imgUrl) {
           chosenList.splice(index, 1);
         }
       })
@@ -81,7 +100,6 @@ export function chooseImage(item, isChosen) {
     } else {
       payload = [...chosenList, imgUrl];
     }
-    console.log("payload: " + JSON.stringify(payload));
     dispatch({
       type: actions.CHOOSE_PHOTO,
       payload: payload
@@ -89,8 +107,18 @@ export function chooseImage(item, isChosen) {
   }
 }
 
-export function clearChosenList(dispatch) {
-  return dispatch({
-    type: actions.CLEAR_CHOSEN_LIST
-  })
+export function clearChosenList() {
+  return (dispatch) => {
+    dispatch({
+      type: actions.CLEAR_CHOSEN_LIST
+    })
+  }
+}
+
+export function clearOptionalList() {
+  return (dispatch) => {
+    dispatch({
+      type: actions.CLEAR_OPTIONAL_LIST
+    })
+  }
 }
