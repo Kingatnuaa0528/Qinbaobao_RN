@@ -53,6 +53,7 @@ const Content = () => {
                     item={item.item}
                     width={screenWidth - timeLineFlexBasis}
                     key={item.key}
+                    style={styles.card}
                 />
             </View>
 
@@ -94,7 +95,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
-        marginTop: 5
+        marginTop: 5,
+        backgroundColor: '#F5F5F5'
     },
     scroll_view: {
         //flexBasis: 500, 
@@ -111,7 +113,7 @@ const styles = StyleSheet.create({
     timeline: {
         borderColor: '#BEBEBE',
         borderLeftWidth: 0,
-        borderRightWidth: 3
+        borderRightWidth: 2
     },
     list: {
         justifyContent: 'space-around',
@@ -121,6 +123,9 @@ const styles = StyleSheet.create({
         height: timelineDotSize,
         borderRadius: timelineDotSize/2,
         backgroundColor: '#FFB90F'
+    },
+    card: {
+        marginBottom: 10
     }
 });
 
