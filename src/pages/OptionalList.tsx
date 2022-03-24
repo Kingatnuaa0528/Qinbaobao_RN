@@ -18,7 +18,11 @@ const ON_END_REACHED_THRES = 0.2;
 
 // ui组件
 const OptionalListPage = (props) => {
-  const { data, fetchPhoto, clearOptionalList, clearChosenList } = props;
+  const { 
+    data, hasNext, 
+    fetchPhoto, clearOptionalList, clearChosenList 
+  } = props;
+
   const [imgWidth, setWidth] = useState(120);
   const [imgHeight, setHeight] = useState(120);
 
@@ -71,7 +75,10 @@ const OptionalListPage = (props) => {
   }
 
   function onEndReached() {
-    console.log("onEndReached");
+    if(hasNext) {
+      console.log("[onEndReached] fetchPhoto!");
+      fetchPhoto();
+    }
   }
 
   // render
@@ -92,14 +99,15 @@ const OptionalListPage = (props) => {
 
 function mapStateToProps(state) {
   return {
-    data: state.photoReducer.photoList
+    data: state.photoReducer.photoList,
+    hasNext: state.photoReducer.hasNext
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     fetchPhoto: () => {
-      dispatch(fetchPhoto);
+      dispatch(fetchPhoto(""));
     },
     clearOptionalList: () => {
       dispatch(clearOptionalList());

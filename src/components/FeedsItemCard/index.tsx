@@ -7,60 +7,79 @@ import {
 } from 'react-native';
 
 function FeedsItemCard(props: any) {
-    const { item, width } = props;
+    const { item, width, style } = props;
     const itemWidth = width;
     const imgScaleRatio = 0.93;
 
-    function getImageScale ({imgPath: imgPath, rowNumber: rowNumber, containerWidth: containerWidth, imgScaleRatio: imgScaleRatio}) {
-        const imageObject = Image.resolveAssetSource(imgPath);
-        const { width, height } = imageObject;
+    function getImageScale({ rowNumber: rowNumber }) {
         return {
-            width: containerWidth * imgScaleRatio / rowNumber,
-            height: containerWidth * imgScaleRatio / (rowNumber * width) * height
+            width: itemWidth * imgScaleRatio / rowNumber,
+            height: itemWidth * imgScaleRatio / rowNumber
         };
-      }
-      
+    }
+
+    function formatTimeStamp(timeStamp) {
+        const time = new Date(timeStamp);
+        return (time.getMonth() + 1).toString() + "-" + time.getDate().toString() + " " + time.getHours() + ":" + time.getMinutes();
+    }
 
     return (
-        <View style={styles.card}>
-            <Text>{item.date}</Text>
+        <View style={{
+            width: itemWidth,
+            ...style,
+            ...styles.card
+        }}>
+            <Text style={styles.dateText}>{item.date}</Text>
             <View style={styles.imageContainer}>
-            {
-                item.imgSourceList.map((imgUrl: any, index: number) => {
-                    return(
-                        <Image
-                            source={imgUrl} 
-                            key={index}
-                            style={[
-                                styles.image,
-                                getImageScale({
-                                    imgPath: imgUrl, 
-                                    rowNumber: item.imgSourceList.length,
-                                    containerWidth: itemWidth,
-                                    imgScaleRatio: imgScaleRatio
-                                }),
-                            ]}
-                        />
-                    )
-                })
-            }
+                {
+                    item.imgSourceList.map((imgUrl: any, index: number) => {
+                        return (
+                            <Image
+                                source={{ uri: imgUrl }}
+                                key={index}
+                                style={
+                                    getImageScale({
+                                        rowNumber: item.imgSourceList.length
+                                    })
+                                }
+                            />
+                        )
+                    })
+                }
             </View>
+            {
+                item.diaryText != undefined && item.diaryText.length > 0 &&
+                <Text style={styles.diaryText}>{item.diaryText}</Text>
+            }
+            {
+                item.timeStamp != undefined &&
+                <Text style={{marginTop: 4, fontSize: 12}}>{formatTimeStamp(item.timeStamp)}</Text>
+            }
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     card: {
-        marginLeft: 3,
-        marginRight: 10
+        paddingRight: 15,
     },
     imageContainer: {
-        flexDirection: 'row', 
-        flex: 1, 
+        flexDirection: 'row',
+        flex: 1,
         justifyContent: 'space-between'
     },
     image: {
-        alignItems: "center",
+        //alignItems: "center",
+    },
+    dateText: {
+        color: '#000000',
+        fontSize: 17,
+        marginBottom: 3
+    },
+    diaryText: {
+        color: '#000000',
+        fontSize: 15,
+        marginTop: 8
     }
 });
 

@@ -6,6 +6,7 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
+    DeviceEventEmitter,
 } from 'react-native';
 import { connect } from 'react-redux';
 
@@ -14,11 +15,16 @@ import OptionalList from '../pages/OptionalList';
 import Publish from '../pages/Publish';
 import { submitNote } from '../services/diary';
 import { clearChosenList } from '../redux/module/photo';
+import { BACK_EVENT_FROM_PUBLISH } from '../services/diary';
 
 const Stack = createNativeStackNavigator();
 
 function AppPage(props) {
     const { clearChosenList } = props;
+    function getCurrentTime() {
+        var date = new Date();
+        return date;
+    }
     return (
         <NavigationContainer>
             <View style={styles.container}>
@@ -50,7 +56,7 @@ function AppPage(props) {
                     <Stack.Screen
                         name="Publish"
                         component={Publish}
-                        options={({ navigation: { goBack } }) => ({
+                        options={({ navigation: { goBack, navigate } }) => ({
                             headerLeft: () => (
                                 <Text onPress={() => {
                                     clearChosenList();
@@ -61,7 +67,9 @@ function AppPage(props) {
                                 <Text
                                     style={styles.publishBtn}
                                     onPress={() => {
-                                        submitNote();
+                                        submitNote(getCurrentTime());
+                                        DeviceEventEmitter.emit(BACK_EVENT_FROM_PUBLISH, {});
+                                        navigate('Home');
                                     }}
                                 >
                                     保存

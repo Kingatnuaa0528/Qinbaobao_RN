@@ -1,53 +1,91 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     SafeAreaView,
-    ScrollView,
     StyleSheet,
     View,
     Dimensions,
+    FlatList,
+    DeviceEventEmitter,
 } from 'react-native';
-import images from '../../resource/Images';
 
 import FeedsItemCard from '../components/FeedsItemCard';
 import TabBar from '../TabBar';
+import { getAllStorageByPage } from '../utils/storage';
+import { BACK_EVENT_FROM_PUBLISH } from '../services/diary';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const timeLineFlexBasis = 20;
+const timeLineFlexBasis = 30;
+const timelineDotSize = 10;
 
-const dataList = [{
-    "key": 0,
-    "date": "2月21日 9个月12天",
-    "imgSourceList": [images.tiger2, images.tiger2]
-}, {
-    "key": 1,
-    "date": "1月15日 8个月6天",
-    "imgSourceList": [images.tiger2]
-}];
+const ON_END_REACHED_THRES = 0.2;
 
 const Content = () => {
-    return (
-        <SafeAreaView style={{flex: 1}}>
-            <View style={styles.container}>
-                <View style={{ flexBasis: timeLineFlexBasis }}>
+    const [dataList, setDataList] = useState<any[]>([]);
+    const [cursor, setCursor] = useState(0);
+    const [hasNext, setHasNext] = useState(true);
+    const [waiting, setWaiting] = useState(false);
+    const [itemHeight, setItemHeight] = useState(200);
+
+    useEffect(() => {
+        getContentListByPage();
+        DeviceEventEmitter.addListener(BACK_EVENT_FROM_PUBLISH, () => {
+            getContentListByPage();
+        })
+    }, []);
+    function onCardLayout(event) {
+        console.log("onCardLayout: " + event.nativeEvent.layout.height);
+        setItemHeight(event.nativeEvent.layout.height);
+    }
+    function renderItem(item) {
+        console.log("item: " + JSON.stringify(item));
+        return (
+            <View style={styles.itemContainer} onLayout={(event) => {
+                onCardLayout(event);
+            }}>
+                <View style={styles.timelineContainer} >
+                    <View style={styles.timeDot} />
+                    <View style={{
+                        height: itemHeight - timelineDotSize,
+                        ...styles.timeline
+                    }} />
                 </View>
-                <ScrollView
-                    contentInsetAdjustmentBehavior="automatic"
-                    style={styles.scroll_view}
-                >
-                    {
-                        dataList.map((item) => {
-                            return (
-                                <FeedsItemCard
-                                    item={item}
-                                    width={screenWidth - timeLineFlexBasis}
-                                    key={item.key}
-                                />
-                            )
-                        })
-                    }
-                </ScrollView>
+                <FeedsItemCard
+                    item={item.item}
+                    width={screenWidth - timeLineFlexBasis}
+                    key={item.key}
+                />
             </View>
-            <TabBar/>
+
+        )
+    }
+    function getContentListByPage() {
+        if (hasNext) {
+            getAllStorageByPage(cursor).then(res => {
+                const newDataList = [...dataList, ...res.data];
+                setDataList(newDataList);
+                setCursor(res.cursor);
+                setHasNext(res.hasNext);
+            }).catch(e => {
+                setHasNext(false);
+                console.log("getAllStorageByPage error! msg: " + JSON.stringify(e));
+            })
+        }
+    }
+    async function onEndReached() {
+        await getContentListByPage();
+    }
+
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.container}>
+                <FlatList
+                    data={dataList}
+                    renderItem={(item) => renderItem(item)}
+                    onEndReachedThreshold={ON_END_REACHED_THRES}
+                    onEndReached={() => onEndReached()}
+                />
+            </View>
+            <TabBar />
         </SafeAreaView>
     );
 }
@@ -56,10 +94,34 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
+        marginTop: 5
     },
     scroll_view: {
         //flexBasis: 500, 
     },
+    itemContainer: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    timelineContainer: {
+        flexBasis: timeLineFlexBasis,
+        alignItems: 'center',
+        height: '100%'
+    },
+    timeline: {
+        borderColor: '#BEBEBE',
+        borderLeftWidth: 0,
+        borderRightWidth: 3
+    },
+    list: {
+        justifyContent: 'space-around',
+    },
+    timeDot: {
+        width: timelineDotSize,
+        height: timelineDotSize,
+        borderRadius: timelineDotSize/2,
+        backgroundColor: '#FFB90F'
+    }
 });
 
 export default Content;

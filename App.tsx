@@ -15,6 +15,7 @@ import { Provider } from 'react-redux';
 
 const store = configStore();
 
+
 export default () => (
     <Provider store={store}>
         <App />

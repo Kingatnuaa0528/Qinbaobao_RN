@@ -57,7 +57,6 @@ function fetchWithPermission(permissions: Array<Permission>, action: Function) {
     if (response == true) {
       const result = await action();
       return Promise.resolve(result);
-      //return result.edges;
     } else {
       return requestPermission(permissions).then(async ret => {
         if (ret == true) {
@@ -66,9 +65,7 @@ function fetchWithPermission(permissions: Array<Permission>, action: Function) {
           return Promise.resolve(result);
         } else {
           console.error("requestPermission error! ret=false");
-          //TODO return new Promise
           return Promise.reject(new Error('fail'));
-          //return null;
         }
       }).catch(err => {
         console.error("requestPermission error! " + JSON.stringify(err));
@@ -79,7 +76,6 @@ function fetchWithPermission(permissions: Array<Permission>, action: Function) {
   }).catch(err => {
     console.error("checkPermission error! " + JSON.stringify(err));
     return Promise.reject(new Error('fail'));
-    //return null;
   })
 }
 

@@ -10,6 +10,7 @@ export const actions = {
   FETCH_PHOTO: "PHOTO/FETCH_PHOTO",
   FETCH_VIDEO: "PHOTO/FETCH_VIDEO",
   CHOOSE_PHOTO: "PHOTO/CHOOSE_PHOTO",
+  SET_DIARY_TEXT: "PHOTO/SET_DIARY_TEXT",
   CLEAR_OPTIONAL_LIST: "PHOTO/CLEAR_OPTIONAL_LIST",
   CLEAR_CHOSEN_LIST: "PHOTO/CLEAR_CHOSEN_LIST",
 }
@@ -20,6 +21,7 @@ const initialStatus = {
   photoList: [],
   dataStatus: "",
   chosenList: [],
+  diaryText: "",
   cursor: '0',
   hasNext: true
 };
@@ -39,6 +41,12 @@ export function photoReducer(state = initialStatus, action: any) {
       return {
         ...state,
         chosenList: action.payload
+      }
+    }
+    case actions.SET_DIARY_TEXT: {
+      return {
+        ...state,
+        diaryText: action.payload
       }
     }
     case actions.CLEAR_OPTIONAL_LIST: {
@@ -62,7 +70,7 @@ export function photoReducer(state = initialStatus, action: any) {
 }
 
 // action creater
-export function fetchPhoto() {
+export function fetchPhoto(test: string) {
   return (dispatch, getState) => {
     const cursor = getState().photoReducer.cursor;
     getPhotosByPage(PAGE_SIZE, cursor).then(response => {
@@ -119,6 +127,15 @@ export function clearOptionalList() {
   return (dispatch) => {
     dispatch({
       type: actions.CLEAR_OPTIONAL_LIST
+    })
+  }
+}
+
+export function setDairyText(text: string) {
+  return (dispatch) => {
+    dispatch({
+      type: actions.SET_DIARY_TEXT,
+      payload: text
     })
   }
 }
