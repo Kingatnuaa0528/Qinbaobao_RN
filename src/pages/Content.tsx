@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+    Text,
     SafeAreaView,
     StyleSheet,
     View,
@@ -12,10 +13,9 @@ import FeedsItemCard from '../components/FeedsItemCard';
 import TabBar from '../TabBar';
 import { getAllStorageByPage } from '../utils/storage';
 import { BACK_EVENT_FROM_PUBLISH } from '../services/diary';
+import TimelineList from '../components/TimelineList';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const timeLineFlexBasis = 30;
-const timelineDotSize = 10;
 
 const ON_END_REACHED_THRES = 0.2;
 
@@ -32,31 +32,15 @@ const Content = () => {
             getContentListByPage();
         })
     }, []);
-    function onCardLayout(event) {
-        console.log("onCardLayout: " + event.nativeEvent.layout.height);
-        setItemHeight(event.nativeEvent.layout.height);
-    }
-    function renderItem(item) {
+    function renderItem(item, width) {
         console.log("item: " + JSON.stringify(item));
         return (
-            <View style={styles.itemContainer} onLayout={(event) => {
-                onCardLayout(event);
-            }}>
-                <View style={styles.timelineContainer} >
-                    <View style={styles.timeDot} />
-                    <View style={{
-                        height: itemHeight - timelineDotSize,
-                        ...styles.timeline
-                    }} />
-                </View>
-                <FeedsItemCard
-                    item={item.item}
-                    width={screenWidth - timeLineFlexBasis}
-                    key={item.key}
-                    style={styles.card}
-                />
-            </View>
-
+            <FeedsItemCard
+                item={item.item}
+                width={width}
+                key={item.key}
+                style={styles.card}
+            />
         )
     }
     function getContentListByPage() {
@@ -79,11 +63,12 @@ const Content = () => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.container}>
-                <FlatList
+                <TimelineList
                     data={dataList}
-                    renderItem={(item) => renderItem(item)}
                     onEndReachedThreshold={ON_END_REACHED_THRES}
                     onEndReached={() => onEndReached()}
+                    screenWidth={screenWidth}
+                    renderCard={(item, width) => renderItem(item, width)}
                 />
             </View>
             <TabBar />
@@ -105,24 +90,8 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
     },
-    timelineContainer: {
-        flexBasis: timeLineFlexBasis,
-        alignItems: 'center',
-        height: '100%'
-    },
-    timeline: {
-        borderColor: '#BEBEBE',
-        borderLeftWidth: 0,
-        borderRightWidth: 2
-    },
     list: {
         justifyContent: 'space-around',
-    },
-    timeDot: {
-        width: timelineDotSize,
-        height: timelineDotSize,
-        borderRadius: timelineDotSize/2,
-        backgroundColor: '#FFB90F'
     },
     card: {
         marginBottom: 10

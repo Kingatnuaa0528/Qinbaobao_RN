@@ -47,7 +47,8 @@ export async function getAllStorageByPage(cursor: number) {
             endCursor = ids.length;
         }
 
-        let chosenIds = ids.slice(cursor, endCursor);
+        const reverseIds = ids.reverse();
+        let chosenIds = reverseIds.slice(cursor, endCursor);
         const query = chosenIds.map( id => ({
             key: CONTENT_KEY, 
             id: id,
